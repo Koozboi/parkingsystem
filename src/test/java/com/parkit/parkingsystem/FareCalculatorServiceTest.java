@@ -1,30 +1,42 @@
 package com.parkit.parkingsystem;
 
-import com.parkit.parkingsystem.constants.Fare;
-import com.parkit.parkingsystem.constants.ParkingType;
-import com.parkit.parkingsystem.model.ParkingSpot;
-import com.parkit.parkingsystem.model.Ticket;
-import com.parkit.parkingsystem.service.FareCalculatorService;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
-public class FareCalculatorServiceTest {
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.constants.ParkingType;
+import com.parkit.parkingsystem.dao.TicketDAO;
+import com.parkit.parkingsystem.model.ParkingSpot;
+import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.service.FareCalculatorService;
 
+
+    
+public class FareCalculatorServiceTest {
+	
+      
     private static FareCalculatorService fareCalculatorService;
     private Ticket ticket;
+    
+
 
     @BeforeAll
-    private static void setUp() {
+    static void setUp() {
         fareCalculatorService = new FareCalculatorService();
     }
 
     @BeforeEach
-    private void setUpPerTest() {
+    void setUpPerTest() {
         ticket = new Ticket();
     }
 
@@ -122,6 +134,67 @@ public class FareCalculatorServiceTest {
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
         assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
+    }
+    
+    @Test
+    public void caluclateFareCarWithLessThanThirtyMinutesParkingTime() {
+        Date inTime = new Date();
+        inTime.setTime( System.currentTimeMillis() - (  30 * 60 * 1000 ) ); //less than 30 minutes parking time should give a fare of 0
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
+        
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        fareCalculatorService.calculateFare(ticket);
+        assertEquals( (0) , ticket.getPrice());
+    }
+    
+    @Test
+    public void calculateFareBikeWithLessThanThirtyMinutesParkingTime() {
+        Date inTime = new Date();
+        inTime.setTime( System.currentTimeMillis() - (  30 * 60 * 1000) );//45 minutes parking time should give 3/4th parking fare
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
+        
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        fareCalculatorService.calculateFare(ticket);
+        assertEquals( (0), ticket.getPrice() );
+    }
+    
+      @Test
+    public void userIsRecurring() {
+    	boolean bool = fareCalculatorService.isRecurring("1234");
+    	assertTrue(bool);
+    }
+      
+    @Test
+    public void userIsNotRecurring() {
+    	boolean bool = fareCalculatorService.isRecurring("7896");
+    	assertFalse(bool);
+    }
+    
+
+
+    
+    @Test
+    public void isRecurringMethod_ReturnsTrue_WhenUserIsRecurring() {
+    	TicketDAO ticketDAO = mock(TicketDAO.class);
+    	fareCalculatorService.setTicketDAO(ticketDAO);
+    	when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+    	boolean bool = fareCalculatorService.isRecurring(anyString());
+    	assertTrue(bool);
+    }
+    
+    @Test
+    public void isRecurringMethod_ReturnsFalse_WhenUserIsNotRecurring() {
+       	TicketDAO ticketDAO = mock(TicketDAO.class);
+       	fareCalculatorService.setTicketDAO(ticketDAO);
+    	when(ticketDAO.getTicket(anyString())).thenReturn(null);
+    	boolean bool = fareCalculatorService.isRecurring(anyString());
+    	assertFalse(bool);
     }
 
 }

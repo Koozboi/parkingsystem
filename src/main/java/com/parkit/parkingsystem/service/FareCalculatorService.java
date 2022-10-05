@@ -5,9 +5,17 @@ import java.time.ZoneId;
 import java.util.Date;
 
 import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
 
 public class FareCalculatorService {
+	
+	public FareCalculatorService() {
+		
+		ticketDAO = new TicketDAO(); 
+	}
+	
+	private TicketDAO ticketDAO;
 
     public void calculateFare(Ticket ticket){
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
@@ -23,16 +31,42 @@ public class FareCalculatorService {
         //TODO: Some tests are failing here. Need to check if this logic is correct
 
         switch (ticket.getParkingSpot().getParkingType()){
-            case CAR: {
+            case CAR: if (duration.toMinutes() > 30) {
                 ticket.setPrice((duration.toMinutes() * Fare.CAR_RATE_PER_HOUR) / 60);
-                break;
             }
-            case BIKE: {
+            else if (duration.toMinutes() <= 30) {
+            	ticket.setPrice(0.0);
+            }
+            break;
+
+            case BIKE: if (duration.toMinutes() > 30) {
                 ticket.setPrice((duration.toMinutes() * Fare.BIKE_RATE_PER_HOUR) / 60);
-                break;
             }
+            else if (duration.toMinutes() <= 30) {
+            	ticket.setPrice(0.0);
+            }
+            break;
             default: throw new IllegalArgumentException("Unkown Parking Type");
 
         }
     }
+    
+    public boolean isRecurring (String vehicleRegNumber) {
+    	
+    	Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
+    	if (ticket == null) {
+    		return false;
+    	}
+    	
+    	return true;
+    	
+    }
+
+	public TicketDAO getTicketDAO() {
+		return ticketDAO;
+	}
+
+	public void setTicketDAO(TicketDAO ticketDAO) {
+		this.ticketDAO = ticketDAO;
+	}
 }
