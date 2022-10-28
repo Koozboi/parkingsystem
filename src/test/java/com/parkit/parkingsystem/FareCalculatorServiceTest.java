@@ -13,9 +13,13 @@ import java.util.Date;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
+import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
+import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
+import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
@@ -24,19 +28,30 @@ import com.parkit.parkingsystem.service.FareCalculatorService;
     
 public class FareCalculatorServiceTest {
 	
-      
-    private static FareCalculatorService fareCalculatorService;
-    private Ticket ticket;
+	private static FareCalculatorService fareCalculatorService;
+	private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
+    private static ParkingSpotDAO parkingSpotDAO;
+    private static TicketDAO ticketDAO;
+    private static DataBasePrepareService dataBasePrepareService;
+    private static Ticket ticket;
+    
     
 
 
     @BeforeAll
     static void setUp() {
+    	
+        parkingSpotDAO = new ParkingSpotDAO();
+        parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
+        ticketDAO = new TicketDAO();
+        ticketDAO.dataBaseConfig = dataBaseTestConfig;
+        dataBasePrepareService = new DataBasePrepareService();
         fareCalculatorService = new FareCalculatorService();
     }
 
     @BeforeEach
     void setUpPerTest() {
+    	dataBasePrepareService.clearDataBaseEntries();
         ticket = new Ticket();
     }
 
@@ -153,7 +168,7 @@ public class FareCalculatorServiceTest {
     @Test
     public void calculateFareBikeWithLessThanThirtyMinutesParkingTime() {
         Date inTime = new Date();
-        inTime.setTime( System.currentTimeMillis() - (  30 * 60 * 1000) );//45 minutes parking time should give 3/4th parking fare
+        inTime.setTime( System.currentTimeMillis() - (  30 * 60 * 1000) );
         Date outTime = new Date();
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
         
@@ -164,28 +179,13 @@ public class FareCalculatorServiceTest {
         assertEquals( (0), ticket.getPrice() );
     }
     
-      @Test
-    public void userIsRecurring() {
-    	boolean bool = fareCalculatorService.isRecurring("1234");
-    	assertTrue(bool);
-    }
-      
-    @Test
-    public void userIsNotRecurring() {
-    	boolean bool = fareCalculatorService.isRecurring("7896");
-    	assertFalse(bool);
-    }
-    
-
-
-    
     @Test
     public void isRecurringMethod_ReturnsTrue_WhenUserIsRecurring() {
     	TicketDAO ticketDAO = mock(TicketDAO.class);
     	fareCalculatorService.setTicketDAO(ticketDAO);
     	when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
-    	boolean bool = fareCalculatorService.isRecurring(anyString());
-    	assertTrue(bool);
+    	boolean recurring = fareCalculatorService.isRecurring(anyString());
+    	assertTrue(recurring);
     }
     
     @Test
@@ -193,8 +193,9 @@ public class FareCalculatorServiceTest {
        	TicketDAO ticketDAO = mock(TicketDAO.class);
        	fareCalculatorService.setTicketDAO(ticketDAO);
     	when(ticketDAO.getTicket(anyString())).thenReturn(null);
-    	boolean bool = fareCalculatorService.isRecurring(anyString());
-    	assertFalse(bool);
+    	boolean recurring = fareCalculatorService.isRecurring(anyString());
+    	assertFalse(recurring);
     }
+    
 
 }

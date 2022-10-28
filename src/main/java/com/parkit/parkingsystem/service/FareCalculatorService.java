@@ -22,7 +22,6 @@ public class FareCalculatorService {
             throw new IllegalArgumentException("Out time provided is incorrect:"+ticket.getOutTime().toString());
         }
 
-        ticket.getInTime();
 		Date inTime = ticket.getInTime();
         Date outTime = ticket.getOutTime();
 
@@ -31,8 +30,14 @@ public class FareCalculatorService {
         //TODO: Some tests are failing here. Need to check if this logic is correct
 
         switch (ticket.getParkingSpot().getParkingType()){
+        
             case CAR: if (duration.toMinutes() > 30) {
+            	if (!isRecurring(ticket.getVehicleRegNumber())) {
                 ticket.setPrice((duration.toMinutes() * Fare.CAR_RATE_PER_HOUR) / 60);
+            }
+            	else {
+            		ticket.setPrice(Math.floor((((duration.toMinutes() * Fare.CAR_RATE_PER_HOUR) / 60) * (0.95)) * 100) / 100);
+            	}
             }
             else if (duration.toMinutes() <= 30) {
             	ticket.setPrice(0.0);
@@ -40,16 +45,20 @@ public class FareCalculatorService {
             break;
 
             case BIKE: if (duration.toMinutes() > 30) {
+            	if (!isRecurring(ticket.getVehicleRegNumber())) {
                 ticket.setPrice((duration.toMinutes() * Fare.BIKE_RATE_PER_HOUR) / 60);
+            	}
+            	else {
+            		ticket.setPrice(Math.floor((((duration.toMinutes() * Fare.BIKE_RATE_PER_HOUR) / 60) * (0.95)) * 100) / 100);
+            	}
             }
             else if (duration.toMinutes() <= 30) {
             	ticket.setPrice(0.0);
             }
             break;
             default: throw new IllegalArgumentException("Unkown Parking Type");
-
         }
-    }
+        }
     
     public boolean isRecurring (String vehicleRegNumber) {
     	
