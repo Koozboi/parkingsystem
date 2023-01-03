@@ -28,7 +28,7 @@ public class TicketDAOTest {
 	}
 	
 	@Test
-	public void saveTicketTest() {
+	public void saveTicketTest() throws Exception {
 		
 		
 		String reg = "ABCDEF";
@@ -57,7 +57,7 @@ public class TicketDAOTest {
 	
 	
 	@Test
-	public void updateTicketTest() {
+	public void updateTicketTest() throws Exception {
 		
 		
 		Ticket ticket2 = ticketDAO.getTicket(ticket.getVehicleRegNumber());

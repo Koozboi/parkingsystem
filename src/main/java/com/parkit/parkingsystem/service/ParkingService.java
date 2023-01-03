@@ -30,8 +30,11 @@ public class ParkingService {
     public void processIncomingVehicle() {
         try{
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
-            if(parkingSpot !=null && parkingSpot.getId() > 0){
+            if(parkingSpot !=null && parkingSpot.getId() > 0) {
                 String vehicleRegNumber = getVehichleRegNumber();
+                Ticket ticketDB = ticketDAO.getInTicket(vehicleRegNumber);
+                
+                if(ticketDB == null) {
                 parkingSpot.setAvailable(false);
                 parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark it's availability as false
 
@@ -48,6 +51,10 @@ public class ParkingService {
                 System.out.println("Generated Ticket and saved in DB");
                 System.out.println("Please park your vehicle in spot number:"+parkingSpot.getId());
                 System.out.println("Recorded in-time for vehicle number:"+vehicleRegNumber+" is:"+inTime);
+                }
+           else {
+                System.out.println("The registration number provided already exists in the DataBase. Please check you entered the correct number and try again.");
+                }
             }
         }catch(Exception e){
             logger.error("Unable to process incoming vehicle",e);

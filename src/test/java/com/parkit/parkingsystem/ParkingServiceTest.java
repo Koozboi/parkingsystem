@@ -77,7 +77,7 @@ public class ParkingServiceTest {
 	 
 	
 	@Test
-	public void processIncomingVehicleTest() {
+	public void processIncomingVehicleTest() throws Exception {
 		try {
 			when(inputReaderUtil.readSelection()).thenReturn(1);
 			when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);

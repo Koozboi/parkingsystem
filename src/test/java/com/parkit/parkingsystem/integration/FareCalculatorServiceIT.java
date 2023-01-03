@@ -57,7 +57,7 @@ public class FareCalculatorServiceIT {
     }
     
     @Test
-    void calculateFareTestCarLessThanThirtyMinutes() {
+    void calculateFareTestCarLessThanThirtyMinutes() throws Exception {
     	
     	Date inTime = new Date();
     	inTime.setTime( System.currentTimeMillis() - (  30 * 60 * 1000 ));
@@ -73,7 +73,7 @@ public class FareCalculatorServiceIT {
     }
     
     @Test
-    void calculateFareTestBikeLessThanThirtyMinutes() {
+    void calculateFareTestBikeLessThanThirtyMinutes() throws Exception {
     	
     	ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
         ticket.setParkingSpot(parkingSpot);
@@ -92,7 +92,7 @@ public class FareCalculatorServiceIT {
     }
     
     @Test
-    void calculateFareTestCarMoreThanOneHour() {
+    void calculateFareTestCarMoreThanOneHour() throws Exception {
 
     	Date inTime = new Date();
     	inTime.setTime( System.currentTimeMillis() - (  60 * 60 * 1000 ));
@@ -107,7 +107,7 @@ public class FareCalculatorServiceIT {
     }
     
     @Test
-    void calculateFareTestBikeMoreThanOneHour() {
+    void calculateFareTestBikeMoreThanOneHour() throws Exception {
     	
     	ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
         ticket.setParkingSpot(parkingSpot);
@@ -125,7 +125,7 @@ public class FareCalculatorServiceIT {
     }
     
     @Test
-    void calculateFareTestForARecurringUser() {
+    void calculateFareTestForARecurringUser() throws Exception {
     	Ticket ticket = new Ticket();
     	
     	Date inTime = new Date();

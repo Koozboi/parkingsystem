@@ -16,6 +16,7 @@ public class FareCalculatorService {
 	}
 	
 	private TicketDAO ticketDAO;
+	private RecurringUser recurringUser = new RecurringUser();
 
     public void calculateFare(Ticket ticket){
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
@@ -27,32 +28,32 @@ public class FareCalculatorService {
 
         Duration duration = Duration.between(inTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(), outTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
         
-        //TODO: Some tests are failing here. Need to check if this logic is correct
-
         switch (ticket.getParkingSpot().getParkingType()){
         
             case CAR: if (duration.toMinutes() > 30) {
-            	if (!isRecurring(ticket.getVehicleRegNumber())) {
+            	if (!recurringUser.isRecurring(ticket.getVehicleRegNumber())) {
                 ticket.setPrice((duration.toMinutes() * Fare.CAR_RATE_PER_HOUR) / 60);
             }
             	else {
             		ticket.setPrice(Math.floor((((duration.toMinutes() * Fare.CAR_RATE_PER_HOUR) / 60) * (0.95)) * 100) / 100);
+
             	}
             }
-            else if (duration.toMinutes() <= 30) {
+            else {
             	ticket.setPrice(0.0);
             }
             break;
 
             case BIKE: if (duration.toMinutes() > 30) {
-            	if (!isRecurring(ticket.getVehicleRegNumber())) {
+            	if (!recurringUser.isRecurring(ticket.getVehicleRegNumber())) {
                 ticket.setPrice((duration.toMinutes() * Fare.BIKE_RATE_PER_HOUR) / 60);
             	}
             	else {
             		ticket.setPrice(Math.floor((((duration.toMinutes() * Fare.BIKE_RATE_PER_HOUR) / 60) * (0.95)) * 100) / 100);
+
             	}
             }
-            else if (duration.toMinutes() <= 30) {
+            else {
             	ticket.setPrice(0.0);
             }
             break;
@@ -60,16 +61,6 @@ public class FareCalculatorService {
         }
         }
     
-    public boolean isRecurring (String vehicleRegNumber) {
-    	
-    	Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
-    	if (ticket == null) {
-    		return false;
-    	}
-    	
-    	return true;
-    	
-    }
 
 	public TicketDAO getTicketDAO() {
 		return ticketDAO;
